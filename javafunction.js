@@ -12,6 +12,12 @@ module.exports = function (RED) {
         this.name = n.name;
         this.func = n.func;
         var id = n.id.replace(/[^a-zA-Z0-9]/g, "");
+		this.jars = n.jars;
+		this.imports = n.imports;
+		this.import = '';
+		for (let statement of this.imports) {
+			this.import += statement;
+		}
         var javaCode = 'import java.awt.*;' +
                        'import java.awt.datatransfer.*;' +
                        'import java.awt.event.*;' +
@@ -33,6 +39,7 @@ module.exports = function (RED) {
                        'import javax.xml.*;' +
                        'import com.google.gson.*;' +
                        'import com.google.gson.stream.*;' +
+					   this.import +
                        '' +
                        'public class JavaFunction' + id + ' {' +
                        '    public static JsonObject main(JsonObject msg) throws Exception {' +
@@ -60,7 +67,11 @@ module.exports = function (RED) {
         var classSeparator = osType === "Windows_NT" ? ";" : ":";
         var encoding = osType === "Windows_NT" ? "Shift_JIS" : "UTF-8";
         var child;
-        exec("javac -cp " + __dirname + directorySeparator + "gson-2.8.5.jar" + classSeparator + ". JavaFunction" + id + ".java",
+		var externalJar = '';
+		for (let j of this.jars) {
+			externalJar += (j + classSeparator);
+		}
+        exec("javac -cp " + __dirname + directorySeparator + "gson-2.8.5.jar" + classSeparator + externalJar + ". JavaFunction" + id + ".java",
              { encoding: "binary" },
              function (error, stdout, stderr) {
                 if (stderr) {
@@ -70,7 +81,7 @@ module.exports = function (RED) {
                 } else {
                     console.log("success: compiled");
                     node.status({fill: "green", shape: "dot", text: "compiled"});
-                    var options = ["-cp", __dirname + directorySeparator + "gson-2.8.5.jar" + classSeparator + ".", "JavaFunction" + id];
+                    var options = ["-cp", __dirname + directorySeparator + "gson-2.8.5.jar" + classSeparator + externalJar + classSeparator + ".", "JavaFunction" + id];
                     if (osType === "Darwin") {
                         options.unshift("-Dapple.awt.UIElement=true");
                     }
@@ -100,7 +111,8 @@ module.exports = function (RED) {
                     });
                     node.activeProcesses[child.pid] = child;
                 }
-            });
+            }
+		);
         this.on("input", function (msg) {
             try {
                 node.status({fill: "green", shape: "dot", text: "executing..."});

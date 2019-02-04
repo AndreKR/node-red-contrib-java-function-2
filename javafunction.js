@@ -28,9 +28,6 @@ module.exports = function (RED) {
                        'import java.nio.*;' +
                        'import java.text.*;' +
                        'import java.util.*;' +
-                       'import javafx.print.*;' +
-                       'import javafx.scene.media.*;' +
-                       'import javafx.util.converter.*;' +
                        'import javax.imageio.*;' +
                        'import javax.print.*;' +
                        'import javax.sound.midi.*;' +

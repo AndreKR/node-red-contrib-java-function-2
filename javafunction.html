@@ -40,6 +40,8 @@
         category: 'function',
         defaults: {
             name: { value: "" },
+			jars: { value: [] },
+			imports: { value: [] },
             func: { value: 'JsonObject jo = new JsonObject();\n'
                         + 'jo.addProperty("message", "Hello Java instead of JavaScript!");\n'
                         + 'jo.addProperty("payload", msg.get("payload").getAsString());\n'
